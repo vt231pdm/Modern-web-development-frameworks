@@ -17,8 +17,10 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ReservationController extends AbstractController
 {
     #[Route('', name: 'reservations_index', methods: ['GET'])]
-    public function index(ReservationRepository $repository): JsonResponse
+    public function index(Request $request, ReservationRepository $repository): JsonResponse
     {
+        $result = $repository->findByFilters($request->query->all());
+
         $data = array_map(fn(Reservation $r) => [
             'id' => $r->getId(),
             'customer' => [
@@ -32,9 +34,12 @@ final class ReservationController extends AbstractController
             'reservedAt' => $r->getReservedAt()?->format('Y-m-d H:i:s'),
             'guestsCount' => $r->getGuestsCount(),
             'status' => $r->getStatus(),
-        ], $repository->findAll());
+        ], $result['items']);
 
-        return $this->json(['data' => $data], Response::HTTP_OK);
+        return $this->json([
+            'data' => $data,
+            'pagination' => $result['meta'],
+        ], Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'reservations_show', methods: ['GET'])]

@@ -10,11 +10,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class OrderController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $orders = Order::with(['customer', 'table', 'menuItem'])->get();
+        $query = Order::with(['customer', 'table', 'menuItem'])
+            ->filter($request->query());
 
-        return response()->json(['data' => $orders], Response::HTTP_OK);
+        return $this->paginatedResponse($query, $request);
     }
 
     public function show(string $id): JsonResponse

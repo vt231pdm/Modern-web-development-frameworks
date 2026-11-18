@@ -15,17 +15,22 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CustomerController extends AbstractController
 {
     #[Route('', name: 'customers_index', methods: ['GET'])]
-    public function index(CustomerRepository $repository): JsonResponse
+    public function index(Request $request, CustomerRepository $repository): JsonResponse
     {
+        $result = $repository->findByFilters($request->query->all());
+
         $data = array_map(fn(Customer $c) => [
             'id' => $c->getId(),
             'fullName' => $c->getFullName(),
             'phone' => $c->getPhone(),
             'email' => $c->getEmail(),
             'createdAt' => $c->getCreatedAt()?->format('Y-m-d H:i:s'),
-        ], $repository->findAll());
+        ], $result['items']);
 
-        return $this->json(['data' => $data], Response::HTTP_OK);
+        return $this->json([
+            'data' => $data,
+            'pagination' => $result['meta'],
+        ], Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'customers_show', methods: ['GET'])]

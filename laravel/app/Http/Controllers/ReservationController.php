@@ -9,11 +9,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ReservationController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $reservations = Reservation::with(['customer', 'table'])->get();
+        $query = Reservation::with(['customer', 'table'])
+            ->filter($request->query());
 
-        return response()->json(['data' => $reservations], Response::HTTP_OK);
+        return $this->paginatedResponse($query, $request);
     }
 
     public function show(string $id): JsonResponse

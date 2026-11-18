@@ -11,33 +11,52 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class MenuItemRepository extends ServiceEntityRepository
 {
+    use PaginationTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, MenuItem::class);
     }
 
-    //    /**
-    //     * @return MenuItem[] Returns an array of MenuItem objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('m.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @param array $filters
+     * @return array
+     */
+        public function findByFilters(array $filters): array
+    {
+        $qb = $this->createQueryBuilder('m');
 
-    //    public function findOneBySomeField($value): ?MenuItem
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if (!empty($filters['id'])) {
+            $qb->andWhere('m.id = :id')
+            ->setParameter('id', (int) $filters['id']);
+        }
+
+        if (!empty($filters['name'])) {
+            $qb->andWhere('m.name LIKE :name')
+            ->setParameter('name', '%' . $filters['name'] . '%');
+        }
+
+        if (!empty($filters['category'])) {
+            $qb->andWhere('m.category LIKE :category')
+            ->setParameter('category', '%' . $filters['category'] . '%');
+        }
+
+        if (!empty($filters['description'])) {
+            $qb->andWhere('m.description LIKE :description')
+            ->setParameter('description', '%' . $filters['description'] . '%');
+        }
+
+        if (!empty($filters['price'])) {
+            $qb->andWhere('m.price = :price')
+            ->setParameter('price', $filters['price']);
+        }
+
+        if (isset($filters['isActive']) && $filters['isActive'] !== '') {
+            $isActive = filter_var($filters['isActive'], FILTER_VALIDATE_BOOLEAN);
+            $qb->andWhere('m.isActive = :isActive')
+            ->setParameter('isActive', $isActive);
+        }
+
+        return $this->paginate($qb, $filters);
+    }
 }

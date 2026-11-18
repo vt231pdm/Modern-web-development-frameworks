@@ -9,9 +9,11 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RestaurantTableController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return response()->json(['data' => RestaurantTable::all()], Response::HTTP_OK);
+        $query = RestaurantTable::filter($request->query());
+
+        return $this->paginatedResponse($query, $request);
     }
 
     public function show(string $id): JsonResponse

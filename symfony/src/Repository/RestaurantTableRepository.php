@@ -11,33 +11,47 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class RestaurantTableRepository extends ServiceEntityRepository
 {
+    use PaginationTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, RestaurantTable::class);
     }
 
-    //    /**
-    //     * @return RestaurantTable[] Returns an array of RestaurantTable objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @param array $filters
+     * @return array
+     */
+    public function findByFilters(array $filters): array
+    {
+        $qb = $this->createQueryBuilder('t');
 
-    //    public function findOneBySomeField($value): ?RestaurantTable
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if (!empty($filters['id'])) {
+            $qb->andWhere('t.id = :id')
+            ->setParameter('id', (int) $filters['id']);
+        }
+
+        if (!empty($filters['tableNumber'])) {
+            $qb->andWhere('t.tableNumber = :tableNumber')
+            ->setParameter('tableNumber', (int) $filters['tableNumber']);
+        }
+
+        if (!empty($filters['seats'])) {
+            $qb->andWhere('t.seats = :seats')
+            ->setParameter('seats', (int) $filters['seats']);
+        }
+
+        if (!empty($filters['zone'])) {
+            $qb->andWhere('t.zone LIKE :zone')
+            ->setParameter('zone', '%' . $filters['zone'] . '%');
+        }
+
+        if (isset($filters['isAvailable']) && $filters['isAvailable'] !== '') {
+            $isAvailable = filter_var($filters['isAvailable'], FILTER_VALIDATE_BOOLEAN);
+            $qb->andWhere('t.isAvailable = :isAvailable')
+            ->setParameter('isAvailable', $isAvailable);
+        }
+
+        return $this->paginate($qb, $filters);
+    }
 }

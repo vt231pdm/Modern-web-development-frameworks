@@ -11,33 +11,56 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class OrderRepository extends ServiceEntityRepository
 {
+    use PaginationTrait;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Order::class);
     }
 
-    //    /**
-    //     * @return Order[] Returns an array of Order objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @param array $filters
+     * @return array
+     */
+    public function findByFilters(array $filters): array
+    {
+        $qb = $this->createQueryBuilder('o');
 
-    //    public function findOneBySomeField($value): ?Order
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if (!empty($filters['id'])) {
+            $qb->andWhere('o.id = :id')
+            ->setParameter('id', (int) $filters['id']);
+        }
+
+        if (!empty($filters['customerId'])) {
+            $qb->andWhere('o.customer = :customerId')
+            ->setParameter('customerId', (int) $filters['customerId']);
+        }
+
+        if (!empty($filters['tableId'])) {
+            $qb->andWhere('o.restaurantTable = :tableId')
+            ->setParameter('tableId', (int) $filters['tableId']);
+        }
+
+        if (!empty($filters['menuItemId'])) {
+            $qb->andWhere('o.menuItem = :menuItemId')
+            ->setParameter('menuItemId', (int) $filters['menuItemId']);
+        }
+
+        if (!empty($filters['quantity'])) {
+            $qb->andWhere('o.quantity = :quantity')
+            ->setParameter('quantity', (int) $filters['quantity']);
+        }
+
+        if (!empty($filters['totalPrice'])) {
+            $qb->andWhere('o.totalPrice = :totalPrice')
+            ->setParameter('totalPrice', $filters['totalPrice']);
+        }
+
+        if (!empty($filters['status'])) {
+            $qb->andWhere('o.status = :status')
+            ->setParameter('status', $filters['status']);
+        }
+
+        return $this->paginate($qb, $filters);
+    }
 }

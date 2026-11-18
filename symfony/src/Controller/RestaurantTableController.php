@@ -15,17 +15,22 @@ use Symfony\Component\Routing\Attribute\Route;
 final class RestaurantTableController extends AbstractController
 {
     #[Route('', name: 'tables_index', methods: ['GET'])]
-    public function index(RestaurantTableRepository $repository): JsonResponse
+    public function index(Request $request, RestaurantTableRepository $repository): JsonResponse
     {
+        $result = $repository->findByFilters($request->query->all());
+
         $data = array_map(fn(RestaurantTable $t) => [
             'id' => $t->getId(),
             'tableNumber' => $t->getTableNumber(),
             'seats' => $t->getSeats(),
             'zone' => $t->getZone(),
             'isAvailable' => $t->isAvailable(),
-        ], $repository->findAll());
+        ], $result['items']);
 
-        return $this->json(['data' => $data], Response::HTTP_OK);
+        return $this->json([
+            'data' => $data,
+            'pagination' => $result['meta'],
+        ], Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'tables_show', methods: ['GET'])]
