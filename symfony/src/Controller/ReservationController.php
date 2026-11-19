@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/reservations')]
 final class ReservationController extends AbstractController
@@ -125,6 +126,7 @@ final class ReservationController extends AbstractController
     }
 
     #[Route('/{id}', name: 'reservations_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id, ReservationRepository $repository, EntityManagerInterface $em): JsonResponse
     {
         $reservation = $repository->find($id);

@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/customers')]
 final class CustomerController extends AbstractController
@@ -86,6 +87,7 @@ final class CustomerController extends AbstractController
     }
 
     #[Route('/{id}', name: 'customers_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id, CustomerRepository $repository, EntityManagerInterface $em): JsonResponse
     {
         $customer = $repository->find($id);

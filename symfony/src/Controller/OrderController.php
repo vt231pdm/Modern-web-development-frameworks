@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/orders')]
 final class OrderController extends AbstractController
@@ -134,6 +135,7 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/{id}', name: 'orders_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id, OrderRepository $repository, EntityManagerInterface $em): JsonResponse
     {
         $order = $repository->find($id);

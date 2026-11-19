@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/menu-items')]
 final class MenuItemController extends AbstractController
@@ -91,6 +92,7 @@ final class MenuItemController extends AbstractController
     }
 
     #[Route('/{id}', name: 'menu_items_delete', methods: ['DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id, MenuItemRepository $repository, EntityManagerInterface $em): JsonResponse
     {
         $item = $repository->find($id);
